@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>QuickCart</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; line-height: 1.6; }
+    nav {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px 20px; background: #1e1e2f; color: white; flex-wrap: wrap;
+    }
+    .logo { font-size: 25px; font-weight: bold; }
+    .logo a{
+      color: #ffffff;
+      text-decoration: none;
+    }
+    .search-bar {
+      flex: 1; margin: 0 20px; display: flex;
+    }
+    .search-bar input {
+      width: 100%; padding: 8px; border: none; border-radius: 5px;
+    }
+    .nav-icons {
+      display: flex; gap: 15px; align-items: center; position: relative;
+    }
+    .nav-icons i { font-size: 20px; cursor: pointer; }
+    .dropdown {
+      position: absolute; top: 35px; right: 0; background-color: white;
+      color: black; padding: 10px; display: none; border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); min-width: 150px; z-index: 10;
+    }
+    .login-icon:hover .dropdown,
+    .cart-icon:hover .dropdown {
+      display: block;
+    }
+
+    .carousel-container {
+      position: relative; overflow: hidden; height: 300px;
+    }
+    .carousel-slide {
+      display: flex; transition: transform 0.5s ease-in-out;
+    }
+    .carousel-slide img {
+      width: 100%; height: 300px; object-fit: cover; flex-shrink: 0;
+    }
+    .carousel-container button {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      background-color: rgba(0, 0, 0, 0.5); border: none; color: white;
+      font-size: 24px; cursor: pointer; padding: 10px; z-index: 2;
+    }
+    .prevBtn { left: 10px; }
+    .nextBtn { right: 10px; }
+    .indicators {
+      position: absolute; bottom: 10px; width: 100%;
+      text-align: center; z-index: 2;
+    }
+    .dot {
+      display: inline-block; height: 10px; width: 10px; margin: 0 5px;
+      background-color: #ccc; border-radius: 50%; cursor: pointer;
+    }
+    .dot.active { background-color: #333; }
+
+    .card-gallery {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px; padding: 20px;
+    }
+    .card {
+      background-color: #f4f4f4; border-radius: 10px; overflow: hidden;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    .card img {
+      width: 100%; height: 200px; object-fit: cover;
+    }
+    .card-content {
+      padding: 15px;
+    }
+    .card-content button {
+      margin-top: 10px;
+      background-color: #1e1e2f;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    footer {
+      background: #1e1e2f; color: white; text-align: center;
+      padding: 20px; margin-top: 20px;
+    }
+
+    #cart-count {
+      background: red; color: white; border-radius: 50%;
+      padding: 2px 6px; font-size: 12px;
+      position: absolute; top: -5px; right: -10px;
+    }
+
+
+    .fa-solid{
+      color: #ffffff;
+    
+    }
+
+
+
+
+    .modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(0,0,0,0.6);
+    justify-content: center; align-items: center;
+  }
+  .modal-content {
+    background: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+    position: relative;
+  }
+  .modal-content img {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+  }
+  .modal-content h3 {
+    margin-top: 15px;
+    font-size: 1.2rem;
+  }
+  .modal-content p {
+    margin: 10px 0;
+  }
+  .modal .close {
+    position: absolute;
+    right: 12px;
+    top: 8px;
+    font-size: 24px;
+    cursor: pointer;
+  }
+  .hidden {
+    display: none;
+  }
+
+
+
+
+
+
+
+    @media (max-width: 768px) {
+      .search-bar { order: 3; width: 100%; margin-top: 10px; }
+      nav { flex-direction: column; align-items: flex-start; }
+      .nav-icons { order: 2; margin-top: 10px; width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav>
+    <div class="logo"><a href="index.html">QuickCart</a></div>
+    <div class="search-bar">
+     <input type="text" id="search-bar" placeholder="Search products..." />
+
+    </div>
+    <div class="nav-icons">
+      <div class="login-icon">
+        <i class="fa-solid fa-user"></i>
+        <div class="dropdown">
+          <p>Login</p>
+          <p>Register</p>
+        </div>
+      </div>
+      <div class="cart-icon" style="position: relative;">
+        <a href="cart.html"><i class="fa-solid fa-cart-shopping"></i></a>
+        <span id="cart-count">0</span>
+        <div class="dropdown" id="cart-dropdown">
+          <p><strong>Cart:</strong></p>
+          <ul id="cart-items" style="list-style: none; padding: 0; margin: 5px 0;"></ul>
+        </div>
+      </div>
+      <i class="fa-solid fa-store"></i>
+      <a href="contact.html"><i class="fa-solid fa-envelope"></i></a>
+    </div>
+  </nav>
+
+  <!-- Carousel -->
+  <div class="carousel-container">
+    <div class="carousel-slide" id="carouselSlide">
+      <img src="carousel-item-1.png" alt="Fashion Banner" />
+      <img src="carousel-item-2.png" alt="Electronics Banner" />
+      <img src="carousel-item-3.png" alt="Gadget Banner" />
+      <img src="carousel-item-4.png" alt="Smartwatch Banner" />
+      <img src="carousel-item-5.png" alt="Clothing Banner" />
+      <img src="carousel-item-6.png" alt="Headphones Banner" />
+      <img src="carousel-item-7.png" alt="Sneakers Banner" />
+      <img src="carousel-item-8.png" alt="Backpack Banner" />
+      <img src="carousel-item-9.png" alt="Mobile Banner" />
+      <img src="carousel-item-10.png" alt="Sale Banner" />
+    </div>
+    <button class="prevBtn" id="prevBtn">&#10094;</button>
+    <button class="nextBtn" id="nextBtn">&#10095;</button>
+    <div class="indicators" id="indicators"></div>
+  </div>
+
+  <!-- Card Gallery -->
+  <div class="card-gallery">
+    <!-- Existing Cards -->
+    <div class="card" data-name=" Premium Supima Jacket for Elite Men: India’s Ultimate Winter Shield " data-price="1299">
+      <img src="card-1.jpg" alt="Product 1" />
+      <div class="card-content">
+        <h3>
+          Premium Supima Jacket for Elite Men: India’s Ultimate Winter Shield         </h3>
+        <p>₹1299</p>
+        <button class="add-to-cart">Add to Cart</button>
+        <button class="view-more">View More</button>
+
+      </div>
+    </div>
+    <div class="card" data-name="NOBERO Men's Oceanic Knit Textured Polo Shirt - 100% Cotton Flat Knit, Regular Fit" data-price="875">
+      <img src="card-2.jpg" alt="Product 2" />
+      <div class="card-content">
+        <h3>NOBERO Men's Oceanic Knit Textured Polo Shirt - 100% Cotton Flat Knit, Regular Fit</h3>
+        <p>₹875</p>
+        <button class="add-to-cart">Add to Cart</button>
+        <button class="view-more">View More</button>
+      </div>
+    </div>
+    <div class="card" data-name="Navy Solid Casual Full Sleeves Shirt Collar Men Slim Fit Blazers" data-price="4568">
+      <img src="card-3.jpg" alt="Product 3" />
+      <div class="card-content">
+        <h3>Navy Solid Casual Full Sleeves Shirt Collar Men Slim Fit Blazers</h3>
+        <p>₹4568</p>
+        <button class="add-to-cart">Add to Cart</button>
+        <button class="view-more">View More</button>
+      </div>
+    </div>
+    <div class="card" data-name="Zago Men Western Casual Leisure Slim Tailoring Padded Suit Blazer" data-price="1499">
+      <img src="card-4.jpg" alt="Product 4" />
+      <div class="card-content">
+        <h3>	
+          Zago Men Western Casual Leisure Slim Tailoring Padded Suit Blazer </h3>
+        <p>₹1499</p>
+        <button class="add-to-cart">Add to Cart</button>
+        <button class="view-more">View More</button>
+      </div>
+    </div>
+    <!-- Added Cards -->
+    <div class="card" data-name="Mens Winter Wear Long Jacket Black Polar Fleece With Zipper Full Sleeves Hood Snow Windproof Warm Jacket" data-price="3456">
+      <img src="card-5.jpg" alt="Product 5" />
+      <div class="card-content">
+        <h3>Mens Winter Wear Long Jacket Black Polar Fleece With Zipper Full Sleeves Hood Snow Windproof Warm Jacket</h3>
+        <p>₹2599</p>
+        <button class="add-to-cart">Add to Cart</button>
+        <button class="view-more">View More</button>
+      </div>
+    </div>
+    <div class="card" data-name="Product 6" data-price="69.99">
+      <img src="card-6.jpg" alt="Product 6" />
+      <div class="card-content">
+        <h3>LEOTUDE CASUAL JACKET For Men's Loopknit Full Sleeve Regular Fit Solid Bomber Jacket (Color Green)</h3>
+        <p>₹499</p>
+        <button class="add-to-cart">Add to Cart</button>
+        <button class="view-more">View More</button>
+      </div>
+    </div>
+    <div class="card" data-name="Product 6" data-price="69.99">
+      <img src="card-7.jpg" alt="Product 6" />
+      <div class="card-content">
+        <h3>Integration Men's Casual blazers, Stretchable Fabric, Ideal for Any Occasion</h3>
+        <p>₹1499</p>
+        <button class="add-to-cart">Add to Cart</button>
+        <button class="view-more">View More</button>
+      </div>
+    </div>
+    <div class="card" data-name="Product 6" data-price="69.99">
+      <img src="card-8.jpg" alt="Product 6" />
+      <div class="card-content">
+        <h3>MENS| jeans shirt shoes belt sunglasses watch wallet combo</h3>
+        <p>₹2299</p>
+        <button class="add-to-cart">Add to Cart</button>
+        <button class="view-more">View More</button>
+      </div>
+    </div>
+    <div class="card" data-name="Product 6" data-price="69.99">
+      <img src="card-9.jpg" alt="Product 6" />
+      <div class="card-content">
+        <h3> Symbol Men's Rayon Blend Festive Solid Long Kurta (Regular Fit)</h3>
+        <p>₹489</p>
+        <button class="add-to-cart">Add to Cart</button>
+        <button class="view-more">View More</button>
+      </div>
+    </div>
+    <div class="card" data-name="Product 6" data-price="69.99">
+      <img src="card-10.jpg" alt="Product 6" />
+      <div class="card-content">
+        <h3>Mens Winter Wear Long Jacket Black Polar Fleece With Zipper Full Sleeves Hood Snow Windproof Warm Jacket</h3>
+        <p>₹2599</p>
+        <button class="add-to-cart">Add to Cart</button>
+        <button class="view-more">View More</button>
+      </div>
+    </div>
+    <div class="card" data-name="Product 6" data-price="69.99">
+      <img src="card-11.jpg" alt="Product 6" />
+      <div class="card-content">
+        <h3>Product 6</h3>
+        <p>₹2599</p>
+        <button class="add-to-cart">Add to Cart</button>
+        <button class="view-more">View More</button>
+      </div>
+    </div>
+    <div class="card" data-name="Product 6" data-price="69.99">
+      <img src="card-12.jpg" alt="Product 6" />
+      <div class="card-content">
+        <h3>Product 6</h3>
+        <p>₹2599</p>
+        <button class="add-to-cart">Add to Cart</button>
+        <button class="view-more">View More</button>
+      </div>
+    </div>
+    <div class="card" data-name="Product 6" data-price="69.99">
+      <img src="card-13.jpg" alt="Product 6" />
+      <div class="card-content">
+        <h3>Product 6</h3>
+        <p>₹2599</p>
+        <button class="add-to-cart">Add to Cart</button>
+        <button class="view-more">View More</button>
+      </div>
+    </div>
+    <div class="card" data-name="Product 6" data-price="69.99">
+      <img src="1.jpg" alt="Product 6" />
+      <div class="card-content">
+        <h3>Product 6</h3>
+        <p>₹2599</p>
+        <button class="add-to-cart">Add to Cart</button>
+        <button class="view-more">View More</button>
+      </div>
+    </div>
+    <div class="card" data-name="Product 6" data-price="69.99">
+      <img src="2.jpg" alt="Product 6" />
+      <div class="card-content">
+        <h3>Product 6</h3>
+        <p>₹2599</p>
+        <button class="add-to-cart">Add to Cart</button>
+        <button class="view-more">View More</button>
+      </div>
+    </div>
+    <div class="card" data-name="Product 6" data-price="69.99">
+      <img src="3.jpg" alt="Product 6" />
+      <div class="card-content">
+        <h3>Product 6</h3>
+        <p>₹2599</p>
+        <button class="add-to-cart">Add to Cart</button>
+        <button class="view-more">View More</button>
+      </div>
+    </div>
+    <div class="card" data-name="Product 6" data-price="69.99">
+      <img src="4.jpg" alt="Product 6" />
+      <div class="card-content">
+        <h3>Product 6</h3>
+        <p>₹2599</p>
+        <button class="add-to-cart">Add to Cart</button>
+        <button class="view-more">View More</button>
+      </div>
+    </div>
+    <div class="card" data-name="Product 7" data-price="79.99">
+      <img src="5.jpg" alt="Product 7" />
+      <div class="card-content">
+        <h3>Product 7</h3>
+        <p>₹2599</p>
+        <button class="add-to-cart">Add to Cart</button>
+        <button class="view-more">View More</button>
+      </div>
+    </div>
+    <div class="card" data-name="Product 8" data-price="89.99">
+      <img src="6.jpg" alt="Product 8" />
+      <div class="card-content">
+        <h3>Product 8</h3>
+        <p>₹2599</p>
+        <button class="add-to-cart">Add to Cart</button>
+        <button class="view-more">View More</button>
+      </div>
+    </div>
+
+
+
+    
+
+
+  </div>
+
+  <p id="no-results" style="display:none; text-align:center; font-weight:bold; padding:1rem;">No products found</p>
+
+
+  <div id="product-modal" class="modal hidden">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <img id="modal-image" src="" alt="Product Image">
+      <h3 id="modal-title"></h3>
+      <p id="modal-price"></p>
+      <p id="modal-description">This is a sample product description. You can enhance this later.</p>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <p>&copy; 2025 QuickCart. All rights reserved.</p>
+  </footer>
+
+  <!-- Scripts -->
+  <script>
+    const slide = document.getElementById("carouselSlide");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const indicators = document.getElementById("indicators");
+    const totalSlides = slide.children.length;
+    let index = 0;
+    let startX = 0;
+  
+    const updateSlide = () => {
+      slide.style.transform = `translateX(-${index * 100}%)`;
+      document.querySelectorAll(".dot").forEach((dot, i) => {
+        dot.classList.toggle("active", i === index);
+      });
+    };
+  
+    const nextSlide = () => {
+      index = (index + 1) % totalSlides;
+      updateSlide();
+    };
+  
+    const prevSlide = () => {
+      index = (index - 1 + totalSlides) % totalSlides;
+      updateSlide();
+    };
+  
+    for (let i = 0; i < totalSlides; i++) {
+      const dot = document.createElement("span");
+      dot.classList.add("dot");
+      if (i === 0) dot.classList.add("active");
+      dot.addEventListener("click", () => {
+        index = i;
+        updateSlide();
+      });
+      indicators.appendChild(dot);
+    }
+  
+    nextBtn.addEventListener("click", nextSlide);
+    prevBtn.addEventListener("click", prevSlide);
+  
+    slide.addEventListener("touchstart", (e) => {
+      startX = e.touches[0].clientX;
+    });
+  
+    slide.addEventListener("touchend", (e) => {
+      const diff = startX - e.changedTouches[0].clientX;
+      if (diff > 50) nextSlide();
+      else if (diff < -50) prevSlide();
+    });
+  
+    setInterval(nextSlide, 5000);
+  
+    // Cart Logic
+    const cart = JSON.parse(localStorage.getItem("cart")) || [];
+    const cartCount = document.getElementById("cart-count");
+    const cartItemsList = document.getElementById("cart-items");
+  
+    document.querySelectorAll(".add-to-cart").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const card = btn.closest(".card");
+        const name = card.dataset.name;
+const price = parseFloat(card.dataset.price);
+const image = card.querySelector("img").src;
+
+const existing = cart.find(item => item.name === name);
+if (existing) {
+  existing.quantity += 1;
+} else {
+  cart.push({ name, price, image, quantity: 1 });
+}
+
+  
+        localStorage.setItem("cart", JSON.stringify(cart));
+        updateCartUI();
+        alert(`${name} added to cart`);
+      });
+    });
+  
+    function updateCartUI() {
+      cartCount.textContent = cart.reduce((total, item) => total + item.quantity, 0);
+      cartItemsList.innerHTML = "";
+      cart.forEach(item => {
+        const li = document.createElement("li");
+li.innerHTML = `
+  <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+    <img src="${item.image}" alt="${item.name}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;" />
+    <div>
+      <div style="font-weight: bold;">${item.name}</div>
+      <div>₹${(item.price * item.quantity).toFixed(2)} (${item.quantity})</div>
+    </div>
+  </div>
+`;
+cartItemsList.appendChild(li);
+
+      });
+    }
+  
+    // Initialize cart display on page load
+    updateCartUI();
+
+
+
+
+
+    // View More Modal Logic
+const viewMoreButtons = document.querySelectorAll(".view-more");
+const modal = document.getElementById("product-modal");
+const modalImg = document.getElementById("modal-image");
+const modalTitle = document.getElementById("modal-title");
+const modalPrice = document.getElementById("modal-price");
+const modalClose = document.querySelector(".modal .close");
+
+viewMoreButtons.forEach(button => {
+  button.addEventListener("click", function () {
+    const card = button.closest(".card");
+    const img = card.querySelector("img").src;
+    const title = card.querySelector("h3").textContent;
+    const price = card.querySelector("p").textContent;
+
+    modalImg.src = img;
+    modalTitle.textContent = title;
+    modalPrice.textContent = price;
+    modal.classList.remove("hidden");
+    modal.style.display = "flex";
+  });
+});
+
+modalClose.addEventListener("click", () => {
+  modal.classList.add("hidden");
+  modal.style.display = "none";
+});
+
+window.addEventListener("click", (e) => {
+  if (e.target === modal) {
+    modal.classList.add("hidden");
+    modal.style.display = "none";
+  }
+});
+
+// Search bar logic
+// Wait for DOM to fully load before executing the code
+document.addEventListener("DOMContentLoaded", function() {
+  const searchInput = document.getElementById("search-bar");
+  const cards = document.querySelectorAll(".card");
+  const noResultsMessage = document.getElementById("no-results");
+
+  // Event listener to capture input and filter products
+  searchInput.addEventListener("input", function() {
+    const query = searchInput.value.toLowerCase().trim();
+    let found = false;  // Flag to check if a product matches the query
+
+    // Loop through each product card
+    cards.forEach(function(card) {
+      const productName = card.querySelector("h3").textContent.toLowerCase();
+      
+      // Check if the product name contains the search query
+      if (productName.includes(query)) {
+        card.style.display = "block"; // Show matching cards
+        found = true;
+      } else {
+        card.style.display = "none"; // Hide non-matching cards
+      }
+    });
+
+    // If no products match, show the "No products found" message
+    if (!found) {
+      noResultsMessage.style.display = "block";
+    } else {
+      noResultsMessage.style.display = "none";
+    }
+  });
+});
+
+</script>
+  
+</body>
+</html>
