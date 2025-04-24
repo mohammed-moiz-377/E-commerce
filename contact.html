@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Contact Us - QuickCart</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background-color: #f9f9f9;
+    }
+    nav {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px 20px; background: #1e1e2f; color: white;
+    }
+    .logo a {
+      font-size: 24px;
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .nav-icons {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+    .nav-icons a, .nav-icons i {
+      color: white;
+      text-decoration: none;
+      font-size: 18px;
+      position: relative;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: 40px auto;
+      background-color: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h2 {
+      margin-bottom: 20px;
+      text-align: center;
+      color: #1e1e2f;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+    }
+    label {
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    input, textarea {
+      margin-bottom: 20px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+    button {
+      padding: 10px;
+      background-color: #1e1e2f;
+      color: white;
+      border: none;
+      font-size: 16px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #333;
+    }
+    footer {
+      margin-top: 40px;
+      text-align: center;
+      background-color: #1e1e2f;
+      color: white;
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="logo"><a href="index.html">QuickCart</a></div>
+    <div class="nav-icons">
+      <a href="index.html"><i class="fa-solid fa-house"></i></a>
+      <a href="cart.html"><i class="fa-solid fa-cart-shopping"></i></a>
+      <a href="#"><i class="fa-solid fa-user"></i></a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <h2>Contact Us</h2>
+    <form id="contact-form" action="https://formsubmit.co/mohammedmoiz377@gmail.com" method="POST">
+      <label for="name">Full Name</label>
+      <input type="text" id="name" name="name" required />
+
+      <label for="email">Email Address</label>
+      <input type="email" id="email" name="email" required />
+
+      <label for="message">Your Message</label>
+      <textarea id="message" name="message" rows="5" required></textarea>
+
+      <button type="submit">Send Message</button>
+    </form>
+  </div>
+
+  <footer>
+    &copy; 2025 QuickCart. All rights reserved.
+  </footer>
+
+  <script>
+    document.getElementById('contact-form').addEventListener('submit', function (e) {
+      e.preventDefault();
+      alert("Thank you for contacting us, we'll get back to you soon!");
+      this.reset();
+    });
+  </script>
+</body>
+</html>
