@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>QuickCart - Cart</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+    }
+
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px;
+      background: #1e1e2f;
+      color: white;
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+
+    .logo a{
+      color: #ffffff;
+      text-decoration: none;
+    }
+
+    main {
+      max-width: 800px;
+      margin: 30px auto;
+      padding: 20px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #ccc;
+      padding: 15px 0;
+    }
+
+    .cart-item img {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-right: 15px;
+    }
+
+    .item-info {
+      flex: 1;
+      display: flex;
+      align-items: center;
+    }
+
+    .item-details p {
+      margin: 0;
+    }
+
+    .quantity-controls {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .quantity-controls input {
+      width: 40px;
+      text-align: center;
+    }
+
+    .total {
+      text-align: right;
+      font-weight: bold;
+      font-size: 18px;
+      margin-top: 20px;
+    }
+
+    .buttons {
+      text-align: center;
+      margin-top: 30px;
+    }
+
+    .buttons a,
+    .buttons button {
+      background-color: #1e1e2f;
+      color: white;
+      padding: 10px 20px;
+      margin: 0 10px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    footer {
+      background: #1e1e2f;
+      color: white;
+      text-align: center;
+      padding: 15px;
+      margin-top: 40px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav>
+    <div class="logo"><a href="index.html">QuickCart</a></div>
+  </nav>
+
+  <main>
+    <h1>Your Cart</h1>
+    <div id="cart-container"></div>
+    <div class="total" id="total-price">Total: $0.00</div>
+
+    <div class="buttons">
+      <a href="index.html">← Continue Shopping</a>
+      <button onclick="alert('Proceeding to checkout...')">Checkout →</button>
+    </div>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 QuickCart. All rights reserved.</p>
+  </footer>
+  <script>
+    const cart = JSON.parse(localStorage.getItem("cart")) || [];
+    const cartContainer = document.getElementById("cart-container");
+    const totalPriceElement = document.getElementById("total-price");
+  
+    function updateCartDisplay() {
+      cartContainer.innerHTML = "";
+      let total = 0;
+  
+      cart.forEach((item, index) => {
+        const div = document.createElement("div");
+        div.classList.add("cart-item");
+  
+        div.innerHTML = `
+          <div class="item-info">
+            <img src="${item.image || 'https://via.placeholder.com/80'}" alt="${item.name}" />
+            <div class="item-details">
+              <p><strong>${item.name}</strong></p>
+              <div class="quantity-controls">
+                <button onclick="changeQuantity(${index}, -1)">–</button>
+                <input type="number" value="${item.quantity}" min="1" onchange="setQuantity(${index}, this.value)" />
+                <button onclick="changeQuantity(${index}, 1)">+</button>
+              </div>
+              <div style="margin-top: 10px;">
+                <button onclick="placeOrder(${index})" style="background-color: green; color: white; padding: 5px 10px; border: none; border-radius: 5px; margin-right: 8px;">Place Order</button>
+                <button onclick="removeItem(${index})" style="background-color: crimson; color: white; padding: 5px 10px; border: none; border-radius: 5px;">Remove</button>
+              </div>
+            </div>
+          </div>
+          <p>₹${(item.price * item.quantity).toFixed(2)}</p>
+        `;
+  
+        total += item.price * item.quantity;
+        cartContainer.appendChild(div);
+      });
+  
+      totalPriceElement.textContent = `Total: ₹${total.toFixed(2)}`;
+      localStorage.setItem("cart", JSON.stringify(cart));
+    }
+  
+    function changeQuantity(index, delta) {
+      cart[index].quantity += delta;
+      if (cart[index].quantity < 1) cart[index].quantity = 1;
+      updateCartDisplay();
+    }
+  
+    function setQuantity(index, value) {
+      const qty = parseInt(value);
+      cart[index].quantity = isNaN(qty) || qty < 1 ? 1 : qty;
+      updateCartDisplay();
+    }
+  
+    function removeItem(index) {
+      if (confirm(`Remove ${cart[index].name} from cart?`)) {
+        cart.splice(index, 1);
+        updateCartDisplay();
+      }
+    }
+  
+    function placeOrder(index) {
+      alert(`Order placed for: ${cart[index].name} (x${cart[index].quantity})`);
+      cart.splice(index, 1); // remove the item after placing order
+      updateCartDisplay();
+    }
+  
+    updateCartDisplay();
+  </script>
+  
+</html>
